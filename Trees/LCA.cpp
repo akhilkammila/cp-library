@@ -29,8 +29,9 @@ struct LCA {
     vector<vector<int>> adj;
     vector<int> nodeOrder, depths, last;
     vector<int> tree, minIndex;
+    bool initialized = false;
 
-    LCA(int n): n(n), adj(n){}
+    LCA(int n): n(n), adj(n), eulerLength(2*n-1), tree(2*eulerLength), minIndex(2*eulerLength){}
 
     void addEdge(int u, int v) {
         assert(u < n && v < n);
@@ -57,9 +58,6 @@ struct LCA {
         eulerTour(root, root, 1);
 
         // initialize segtree
-        eulerLength = depths.size();
-        tree.resize(eulerLength*2), minIndex.resize(eulerLength*2);
-
         // fill in last eulerLength values
         for(int i = 0; i < eulerLength; i++) {
             tree[i+eulerLength] = depths[i];
@@ -72,9 +70,13 @@ struct LCA {
             if (tree[i*2] < tree[i*2+1]) minIndex[i] = minIndex[i*2];
             else minIndex[i] = minIndex[i*2+1];
         }
+        
+        initialized = true; //mark for error checking
     }
 
     int query(int u, int v) {
+        assert(initialized); // check for initialization
+
         // find index of last occurence of u and v in euler
         int l = last[u];
         int r = last[v];
